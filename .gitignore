@@ -1,0 +1,5 @@
+airflow_env/
+pgdata/
+pgsocket/
+__pycache__/
+*.pyc
