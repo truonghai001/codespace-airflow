@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -e
+
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export AIRFLOW_HOME="$HOME/airflow"
+mkdir -p "$AIRFLOW_HOME"
+
+if [ -n "$POSTGRESQL_URL" ]; then
+    export AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=$(echo "$POSTGRESQL_URL" | sed -E 's|^postgres(ql)?://|postgresql+psycopg2://|')
+fi
+
+if ! pgrep -f "airflow standalone" > /dev/null 2>&1; then
+    source "$WORKSPACE_DIR/airflow_env/bin/activate"
+    nohup airflow standalone > "$AIRFLOW_HOME/standalone.log" 2>&1 &
+    echo "✅ Airflow 3 started in background. Logs: $AIRFLOW_HOME/standalone.log"
+else
+    echo "ℹ️ Airflow 3 is already running."
+fi

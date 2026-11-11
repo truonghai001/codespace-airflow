@@ -1,0 +1,32 @@
+{
+  "name": "Airflow 3 + External Postgres",
+  "image": "://microsoft.com",
+  "secrets": {
+    "postgresql_url": {
+      "description": "External PostgreSQL connection URI for the Airflow metadata database"
+    }
+  },
+  "postCreateCommand": "bash setup.sh",
+  "postStartCommand": "bash start.sh",
+  "forwardPorts": [
+    8080
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "Airflow Web UI",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/airflow_env/bin/python",
+        "python.terminal.activateEnvironment": true
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  }
+}
