@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_DIR="$(pwd)"
 
 if [ -z "$POSTGRESQL_URL" ]; then
-    echo "❌ Error: POSTGRESQL_URL secret is not set. Add it in GitHub Codespaces settings and restart the Codespace."
+    echo "Error: POSTGRESQL_URL secret is not set. Add it in GitHub Codespaces settings."
     exit 1
 fi
 
@@ -12,16 +12,17 @@ fi
 SQLALCHEMY_URL=$(echo "$POSTGRESQL_URL" | sed -E 's|^postgres(ql)?://|postgresql+psycopg2://|')
 export AIRFLOW__DATABASE__SQL_ALCHEMY_CONN="$SQLALCHEMY_URL"
 
-# 1. Create Python virtual environment and install Airflow 3
-if [ ! -d "$WORKSPACE_DIR/airflow_env" ]; then
+# 1. Recreate virtual environment if missing or broken after container rebuild
+if [ ! -x "$WORKSPACE_DIR/airflow_env/bin/python" ]; then
+    rm -rf "$WORKSPACE_DIR/airflow_env"
     python3 -m venv "$WORKSPACE_DIR/airflow_env"
 fi
 
-source "$WORKSPACE_DIR/airflow_env/bin/activate"
-pip install --upgrade pip
-pip install "apache-airflow[postgres]>=3.0.0" psycopg2-binary
+. "$WORKSPACE_DIR/airflow_env/bin/activate"
+python -m pip install --upgrade pip
+python -m pip install "apache-airflow[postgres]>=3.0.0" psycopg2-binary
 
-# 2. Configure Airflow settings
+# 2. Configure Airflow permanently in airflow.cfg
 export AIRFLOW_HOME="$HOME/airflow"
 mkdir -p "$WORKSPACE_DIR/dags"
 
@@ -39,4 +40,4 @@ airflow db check
 airflow db migrate
 airflow dags reserialize
 
-echo "✅ Airflow 3 setup complete using POSTGRESQL_URL secret!"
+echo "Airflow 3 setup complete with external PostgreSQL!"

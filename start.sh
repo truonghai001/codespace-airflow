@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_DIR="$(pwd)"
 export AIRFLOW_HOME="$HOME/airflow"
 mkdir -p "$AIRFLOW_HOME"
 
@@ -10,9 +10,9 @@ if [ -n "$POSTGRESQL_URL" ]; then
 fi
 
 if ! pgrep -f "airflow standalone" > /dev/null 2>&1; then
-    source "$WORKSPACE_DIR/airflow_env/bin/activate"
+    . "$WORKSPACE_DIR/airflow_env/bin/activate"
     nohup airflow standalone > "$AIRFLOW_HOME/standalone.log" 2>&1 &
-    echo "✅ Airflow 3 started in background. Logs: $AIRFLOW_HOME/standalone.log"
+    echo "Airflow 3 running in background. View logs: tail -f $AIRFLOW_HOME/standalone.log"
 else
-    echo "ℹ️ Airflow 3 is already running."
+    echo "Airflow 3 is already running."
 fi

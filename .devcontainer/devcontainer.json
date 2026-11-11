@@ -1,12 +1,17 @@
 {
   "name": "Airflow 3 + External Postgres",
-  "image": "python:3.12-bookworm",
   "secrets": {
-    "postgresql_url": {
+    "POSTGRESQL_URL": {
       "description": "External PostgreSQL connection URI for the Airflow metadata database"
     }
   },
   "postCreateCommand": "bash setup.sh",
   "postStartCommand": "bash start.sh",
-  "forwardPorts": [8080]
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Airflow Web UI",
+      "onAutoForward": "notify"
+    }
+  }
 }
